@@ -1,6 +1,6 @@
 import logging, json, os
 from datetime import datetime, timezone, timedelta
-from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
+from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, ChatMember
 from telegram.ext import Application, CommandHandler, CallbackQueryHandler, ContextTypes
 from config import BOT_TOKEN, CHANNELS, ADMIN_ID
 
@@ -46,7 +46,7 @@ async def check_subscription(update: Update, context: ContextTypes.DEFAULT_TYPE)
         chat_id=user.id,
         text=(
             f"🎉 Дякую за підписку!\n\n"
-            f"☀️ Я повернусь з вашими матеріалами <b>21 липня</b>! 🌊\n\n"
+            f"☀️ Я повернусь з вашими матеріалами <b>21 червня</b>! 🌊\n\n"
             f"Залишайся на зв'язку 🤖✨"
         ),
         parse_mode="HTML"
@@ -136,7 +136,7 @@ def main():
     app.add_handler(CommandHandler("broadcast", broadcast))
     app.add_handler(CommandHandler("stats", stats))
 
-    # Автоматична розсилка 21 липня о 17:00 Київський час (UTC+3)
+    # Автоматична розсилка 21 червня о 17:00 Київський час (UTC+3)
     kyiv_tz = timezone(timedelta(hours=3))
     send_time = datetime(2026, 6, 21, 17, 0, 0, tzinfo=kyiv_tz)
     app.job_queue.run_once(send_miro, when=send_time)
