@@ -1,31 +1,32 @@
 import logging, json, os
-from datetime import datetime
-from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, ChatMember
+from datetime import datetime, timezone, timedelta
+from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import Application, CommandHandler, CallbackQueryHandler, ContextTypes
 from config import BOT_TOKEN, CHANNELS, ADMIN_ID
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-IMAGE_PATH = "11image.jpg"
-MIRO_LINK = "https://miro.com/app/board/uXjVHTRkXwU=/"
+IMAGE_PATH = "summer.jpg"
+MIRO_LINK = "https://miro.com/app/board/uXjVHJW7PDk=/?share_link_id=928038194960"
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.effective_user
     save_user(user.id, user.first_name, user.username)
 
     channels_text = "\n".join(
-        [f"👉 <a href='{ch['link']}'>{ch['link']}</a>" for ch in CHANNELS]
+        [f"  {i+1}. <a href='{ch['link']}'>{ch['link']}</a>"
+         for i, ch in enumerate(CHANNELS)]
     )
 
     text = (
-        f"🎁 <b>БЕЗКОШТОВНА РОЗСИЛКА</b>\n\n"
-        f"Підпишись на канал:\n\n"
+        f"☀️ <b>Отримуйте пак готових уроків SUMMER 2026</b> 🌊\n\n"
+        f"🌴 Підпишись на усі 10 каналів зі списку:\n\n"
         f"{channels_text}\n\n"
-        f"Після підписки натисни кнопку нижче 👇"
+        f"Натисни <b>Готово ☑️</b> та я перевірю твої підписки 🤖"
     )
 
-    keyboard = [[InlineKeyboardButton("✅ Готово!", callback_data="check_sub")]]
+    keyboard = [[InlineKeyboardButton("Готово ☑️", callback_data="check_sub")]]
 
     with open(IMAGE_PATH, "rb") as photo:
         await update.message.reply_photo(
@@ -39,45 +40,37 @@ async def check_subscription(update: Update, context: ContextTypes.DEFAULT_TYPE)
     query = update.callback_query
     await query.answer()
     user = query.from_user
+    mark_subscribed(user.id)
 
-    # Перевіряємо підписку на кожен канал
-    not_subscribed = []
-    for ch in CHANNELS:
+    await context.bot.send_message(
+        chat_id=user.id,
+        text=(
+            f"🎉 Дякую за підписку!\n\n"
+            f"☀️ Я повернусь з вашими матеріалами <b>21 липня</b>! 🌊\n\n"
+            f"Залишайся на зв'язку 🤖✨"
+        ),
+        parse_mode="HTML"
+    )
+
+async def send_miro(context):
+    subscribers = load_subscribers()
+    sent, failed = 0, 0
+    for uid in subscribers:
         try:
-            username = ch["link"].replace("https://t.me/", "@")
-            member = await context.bot.get_chat_member(chat_id=username, user_id=user.id)
-            if member.status in [ChatMember.LEFT, ChatMember.BANNED]:
-                not_subscribed.append(ch)
-        except Exception as e:
-            logger.warning(f"Помилка перевірки {ch['name']}: {e}")
-
-    if not_subscribed:
-        # Людина не підписана — показуємо на які канали ще треба
-        channels_text = "\n".join(
-            [f"❌ <a href='{ch['link']}'>{ch['link']}</a>" for ch in not_subscribed]
-        )
-        keyboard = [[InlineKeyboardButton("🔄 Перевірити ще раз", callback_data="check_sub")]]
-        await query.edit_message_caption(
-            caption=(
-                f"😔 Ти ще не підписана на:\n\n"
-                f"{channels_text}\n\n"
-                f"Підпишись і натисни кнопку нижче 👇"
-            ),
-            parse_mode="HTML",
-            reply_markup=InlineKeyboardMarkup(keyboard)
-        )
-    else:
-        # Все добре — людина підписана!
-        mark_subscribed(user.id)
-        await context.bot.send_message(
-            chat_id=user.id,
-            text=(
-                f"🎉 Чудово, підписка підтверджена!\n\n"
-                f"Тримай свій безкоштовний урок 🎓\n\n"
-                f"👇 Відкрий дошку Miro:\n"
-                f"{MIRO_LINK}"
+            await context.bot.send_message(
+                chat_id=int(uid),
+                text=(
+                    f"🎁 <b>Ваші матеріали SUMMER 2026 вже тут!</b> ☀️\n\n"
+                    f"🌊 Відкривай дошку Miro:\n"
+                    f"{MIRO_LINK}\n\n"
+                    f"Гарного літа! 🌴🤖"
+                ),
+                parse_mode="HTML"
             )
-        )
+            sent += 1
+        except:
+            failed += 1
+    logger.info(f"Автоматична розсилка: надіслано {sent}, помилок {failed}")
 
 async def broadcast(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update.effective_user.id != ADMIN_ID:
@@ -87,6 +80,7 @@ async def broadcast(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
     message_text = " ".join(context.args)
     subscribers = load_subscribers()
+    await update.message.reply_text(f"⏳ Розсилаю для {len(subscribers)} учасників...")
     sent, failed = 0, 0
     for uid in subscribers:
         try:
@@ -101,7 +95,7 @@ async def stats(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
     await update.message.reply_text(
         f"📊 Запустили бот: <b>{len(load_all_users())}</b>\n"
-        f"✅ Підтвердили підписку: <b>{len(load_subscribers())}</b>",
+        f"✅ Натиснули Готово: <b>{len(load_subscribers())}</b>",
         parse_mode="HTML"
     )
 
@@ -141,6 +135,12 @@ def main():
     app.add_handler(CallbackQueryHandler(check_subscription, pattern="^check_sub$"))
     app.add_handler(CommandHandler("broadcast", broadcast))
     app.add_handler(CommandHandler("stats", stats))
+
+    # Автоматична розсилка 21 липня о 17:00 Київський час (UTC+3)
+    kyiv_tz = timezone(timedelta(hours=3))
+    send_time = datetime(2026, 7, 21, 17, 0, 0, tzinfo=kyiv_tz)
+    app.job_queue.run_once(send_miro, when=send_time)
+
     logger.info("✅ Бот запущено!")
     app.run_polling()
 
