@@ -138,7 +138,7 @@ def main():
 
     # Автоматична розсилка 21 липня о 17:00 Київський час (UTC+3)
     kyiv_tz = timezone(timedelta(hours=3))
-    send_time = datetime(2026, 7, 21, 17, 0, 0, tzinfo=kyiv_tz)
+    send_time = datetime(2026, 6, 21, 17, 0, 0, tzinfo=kyiv_tz)
     app.job_queue.run_once(send_miro, when=send_time)
 
     logger.info("✅ Бот запущено!")
