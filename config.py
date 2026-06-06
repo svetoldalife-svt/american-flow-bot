@@ -1,4 +1,4 @@
-BOT_TOKEN = "ВАШ_ТОКЕН_ТУТ"   # ← не міняй, вже є в Railway
+BOT_TOKEN = "8567302135:AAEhOPuJ2vdgvE8phQjHOBFAHnlILuamYGM"  # ← не міняй, вже є в Railway
 ADMIN_ID  = 778444299
 
 CHANNELS = [
