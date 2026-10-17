@@ -23,9 +23,9 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         f"📅 Уроки надійдуть <b>26 жовтня</b>\n\n"
         f"Підпишіться на всіх 7 авторів:\n\n"
         f"{channels_text}\n\n"
-        f"Натисни <b>Готово ☑️</b> та я перевірю твої підписки 🤖"
+        f"Натисни <b>Готово</b> та я перевірю твої підписки 🤖"
     )
-    keyboard = [[InlineKeyboardButton("Готово ☑️", callback_data="check_sub")]]
+    keyboard = [[InlineKeyboardButton("Готово", callback_data="check_sub")]]
     with open(IMAGE_PATH, "rb") as photo:
         await update.message.reply_photo(
             photo=photo, caption=text, parse_mode="HTML",
