@@ -42,14 +42,15 @@ async def check_subscription(update: Update, context: ContextTypes.DEFAULT_TYPE)
     query = update.callback_query
     await query.answer()
     user = query.from_user
+    save_user(user.id, user.first_name, user.username)
     mark_subscribed(user.id)
 
     await context.bot.send_message(
         chat_id=user.id,
         text=(
-            f"🎉 Дякую за підписку!\n\n"
-            f"💰 Я повернусь з вашими матеріалами <b>26 жовтня</b>!\n\n"
-            f"Залишайся на зв'язку 🤖✨"
+            "🎉 Дякую за підписку!\n\n"
+            "💸 Я повернусь з вашими матеріалами <b>26 жовтня</b>!\n\n"
+            "Залишайся на зв'язку 🤖✨"
         ),
         parse_mode="HTML"
     )
@@ -134,7 +135,6 @@ def main():
     app.add_handler(CommandHandler("broadcast", broadcast))
     app.add_handler(CommandHandler("stats", stats))
 
-    # Автоматична розсилка 26 жовтня о 17:00 Київський час (UTC+3)
     kyiv_tz = timezone(timedelta(hours=3))
     send_time = datetime(2026, 10, 26, 17, 0, 0, tzinfo=kyiv_tz)
     app.job_queue.run_once(send_miro, when=send_time)
