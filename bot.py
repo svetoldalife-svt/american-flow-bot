@@ -45,15 +45,17 @@ async def check_subscription(update: Update, context: ContextTypes.DEFAULT_TYPE)
     save_user(user.id, user.first_name, user.username)
     mark_subscribed(user.id)
 
-    await context.bot.send_message(
-        chat_id=user.id,
-        text=(
-            "🎉 Дякую за підписку!\n\n"
-            "💸 Я повернусь з вашими матеріалами <b>26 жовтня</b>!\n\n"
-            "Залишайся на зв'язку 🤖✨"
-        ),
-        parse_mode="HTML"
-    )
+    try:
+        await query.message.reply_text(
+            text=(
+                "🎉 Дякую за підписку!\n\n"
+                "💸 Я повернусь з вашими матеріалами <b>26 жовтня</b>!\n\n"
+                "Залишайся на зв'язку 🤖✨"
+            ),
+            parse_mode="HTML"
+        )
+    except Exception as e:
+        logger.error(f"Помилка відповіді: {e}")
 
 async def send_miro(context):
     subscribers = load_subscribers()
