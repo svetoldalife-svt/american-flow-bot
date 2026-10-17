@@ -1,14 +1,14 @@
 import logging, json, os
 from datetime import datetime, timezone, timedelta
-from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, ChatMember
+from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import Application, CommandHandler, CallbackQueryHandler, ContextTypes
 from config import BOT_TOKEN, CHANNELS, ADMIN_ID
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-IMAGE_PATH = "summer.jpg"
-MIRO_LINK = "https://miro.com/app/board/uXjVHJW7PDk=/?share_link_id=928038194960"
+IMAGE_PATH = "money_talks.jpg"
+MIRO_LINK = "https://miro.com/app/board/uXjVEaRaVZ0=/?share_link_id=926291280845"
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.effective_user
@@ -20,8 +20,10 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     )
 
     text = (
-        f"☀️ <b>Отримуйте пак готових уроків SUMMER 2026</b> 🌊\n\n"
-        f"🌴 Підпишись на усі 10 каналів зі списку:\n\n"
+        f"💰 <b>Отримайте безкоштовний пак уроків</b>\n"
+        f"<b>MONEY TALKS | Career English</b>\n\n"
+        f"📅 Уроки надійдуть <b>26 жовтня</b>\n\n"
+        f"Підпишіться на всіх 7 авторів:\n\n"
         f"{channels_text}\n\n"
         f"Натисни <b>Готово ☑️</b> та я перевірю твої підписки 🤖"
     )
@@ -46,7 +48,7 @@ async def check_subscription(update: Update, context: ContextTypes.DEFAULT_TYPE)
         chat_id=user.id,
         text=(
             f"🎉 Дякую за підписку!\n\n"
-            f"☀️ Я повернусь з вашими матеріалами <b>21 червня</b>! 🌊\n\n"
+            f"💰 Я повернусь з вашими матеріалами <b>26 жовтня</b>!\n\n"
             f"Залишайся на зв'язку 🤖✨"
         ),
         parse_mode="HTML"
@@ -60,10 +62,10 @@ async def send_miro(context):
             await context.bot.send_message(
                 chat_id=int(uid),
                 text=(
-                    f"🎁 <b>Ваші матеріали SUMMER 2026 вже тут!</b> ☀️\n\n"
-                    f"🌊 Відкривай дошку Miro:\n"
+                    f"🎁 <b>Ваші матеріали MONEY TALKS вже тут!</b> 💰\n\n"
+                    f"📚 Відкривай дошку Miro з усіма уроками:\n"
                     f"{MIRO_LINK}\n\n"
-                    f"Гарного літа! 🌴🤖"
+                    f"Гарного навчання! 🚀🤖"
                 ),
                 parse_mode="HTML"
             )
@@ -99,8 +101,6 @@ async def stats(update: Update, context: ContextTypes.DEFAULT_TYPE):
         parse_mode="HTML"
     )
 
-# ─── База ─────────────────────────────────────────────────────────────────────
-
 USERS_FILE = "users.json"
 
 def load_db():
@@ -127,8 +127,6 @@ def mark_subscribed(user_id):
 def load_subscribers(): return [uid for uid, d in load_db().items() if d.get("subscribed")]
 def load_all_users(): return load_db()
 
-# ─── Запуск ───────────────────────────────────────────────────────────────────
-
 def main():
     app = Application.builder().token(BOT_TOKEN).build()
     app.add_handler(CommandHandler("start", start))
@@ -136,9 +134,9 @@ def main():
     app.add_handler(CommandHandler("broadcast", broadcast))
     app.add_handler(CommandHandler("stats", stats))
 
-    # Автоматична розсилка 21 червня о 17:00 Київський час (UTC+3)
+    # Автоматична розсилка 26 жовтня о 17:00 Київський час (UTC+3)
     kyiv_tz = timezone(timedelta(hours=3))
-    send_time = datetime(2026, 6, 21, 17, 0, 0, tzinfo=kyiv_tz)
+    send_time = datetime(2026, 10, 26, 17, 0, 0, tzinfo=kyiv_tz)
     app.job_queue.run_once(send_miro, when=send_time)
 
     logger.info("✅ Бот запущено!")
