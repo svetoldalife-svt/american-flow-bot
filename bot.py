@@ -116,7 +116,7 @@ def load_subscribers(): return [uid for uid, d in load_db().items() if d.get("su
 def load_all_users(): return load_db()
 
 def main():
-    app = Application.builder().token(BOT_TOKEN).drop_pending_updates(True).build()
+    app = Application.builder().token(BOT_TOKEN).build()
     app.add_handler(CommandHandler("start", start))
     app.add_handler(CallbackQueryHandler(check_subscription, pattern="^check_sub$"))
     app.add_handler(CommandHandler("broadcast", broadcast))
