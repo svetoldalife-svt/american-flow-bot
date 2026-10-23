@@ -1,4 +1,6 @@
-BOT_TOKEN = "8567302135:AAEwC52b-kITGEjrooymXDBklPXVDPdmWUk"
+import os
+BOT_TOKEN = os.environ.get("BOT_TOKEN")
+
 ADMIN_ID  = 778444299
 
 CHANNELS = [
